@@ -23,7 +23,7 @@ export default function VideoUpload() {
 
       // ✅ Step 1: Get signed upload URL + object key
       const signedRes = await axios.post(
-        'http://localhost:5002/api/admin/uploadVideo',
+        'https://theclipstream-backend.onrender.com/api/admin/uploadVideo',
         {
           fileName: video.name,
           fileType: video.type,
@@ -50,7 +50,7 @@ export default function VideoUpload() {
       setMessage('Saving video metadata to database...');
 
       const saveRes = await axios.post(
-        'http://localhost:5002/api/admin/add',
+        'https://theclipstream-backend.onrender.com/api/admin/add',
         {
           key, // 👈 Wasabi object key
           description,

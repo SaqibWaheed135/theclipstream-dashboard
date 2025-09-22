@@ -13,7 +13,7 @@ export default function RechargeAdmin() {
   const fetchRecharges = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:5002/api/recharges/history",
+        "https://theclipstream-backend.onrender.com/api/recharges/history",
         { withCredentials: true } // ensure auth cookies sent
       );
 
@@ -36,7 +36,7 @@ export default function RechargeAdmin() {
 
     try {
       const response = await axios.post(
-        `http://localhost:5002/api/recharges/admin/approve/${id}`,
+        `https://theclipstream-backend.onrender.com/api/recharges/admin/approve/${id}`,
         { notes: "Approved by admin" },
         { withCredentials: true }
       );
@@ -61,7 +61,7 @@ export default function RechargeAdmin() {
 
     try {
       const response = await axios.post(
-        `http://localhost:5002/api/recharges/admin/reject/${id}`,
+        `https://theclipstream-backend.onrender.com/api/recharges/admin/reject/${id}`,
         { reason },
         { withCredentials: true }
       );
