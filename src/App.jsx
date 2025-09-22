@@ -13,6 +13,7 @@ import VideoListApproval from './Pages/ApprovalVideoList';
 import ApprovedVideoList from './Pages/ApprovedVideoList';
 import VideoUpload from './Pages/AdVideo';
 import ReportedVideos from './Pages/VideoReports';
+import RechargeAdmin from './Pages/Recharge';
 
 function App() {
   return (
@@ -37,6 +38,17 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <Withdraw />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+         <Route
+          path="/recharge"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RechargeAdmin />
               </Layout>
             </ProtectedRoute>
           }

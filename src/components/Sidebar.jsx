@@ -58,7 +58,8 @@ export default function Sidebar() {
         <ul>
           <li><Link to="/dashboard"><Home size={18} /> Dashboard</Link></li>
 
-          <li><Link to="/withdraw"><Coins size={18} /> Withdraw</Link></li>
+          <li><Link to="/withdraw"><Coins size={18} /> Withdraw Requests</Link></li>
+          <li><Link to="/recharge"><Coins size={18} /> Recharge Requests</Link></li>
           <li><Link to="/users"><Users size={18} /> Users</Link></li>
 
           {/* ✅ Videos Dropdown */}
