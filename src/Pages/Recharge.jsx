@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { CheckCircle, AlertCircle } from "lucide-react";
 
 export default function RechargeAdmin() {
   const [recharges, setRecharges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({});
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchRecharges();
@@ -14,7 +17,7 @@ export default function RechargeAdmin() {
     try {
       const res = await axios.get(
         "https://theclipstream-backend.onrender.com/api/recharges/history",
-        { withCredentials: true } // ensure auth cookies sent
+        { withCredentials: true }
       );
 
       if (res.data.recharges) {
@@ -25,6 +28,7 @@ export default function RechargeAdmin() {
       }
     } catch (err) {
       console.error("Failed to fetch recharges:", err.response?.data || err);
+      setError("Failed to fetch recharge requests ❌");
       setRecharges([]);
     } finally {
       setLoading(false);
@@ -44,14 +48,23 @@ export default function RechargeAdmin() {
       if (response.data.msg) {
         setRecharges((prev) =>
           prev.map((r) =>
-            r._id === id ? { ...r, status: "approved", approvedAt: new Date().toISOString() } : r
+            r._id === id
+              ? {
+                  ...r,
+                  status: "approved",
+                  approvedAt: new Date().toISOString(),
+                  userBalance: response.data.newBalance,
+                }
+              : r
           )
         );
-        alert("Recharge approved successfully ✅");
+        setSuccess(
+          `Recharge approved successfully ✅\nNew balance: ${response.data.newBalance?.toLocaleString()} points`
+        );
       }
     } catch (err) {
       console.error("Failed to approve:", err.response?.data || err);
-      alert(err.response?.data?.msg || "Failed to approve recharge ❌");
+      setError(err.response?.data?.msg || "Failed to approve recharge ❌");
     }
   };
 
@@ -69,30 +82,38 @@ export default function RechargeAdmin() {
       if (response.data.msg) {
         setRecharges((prev) =>
           prev.map((r) =>
-            r._id === id ? { ...r, status: "rejected", rejectedAt: new Date().toISOString() } : r
+            r._id === id
+              ? {
+                  ...r,
+                  status: "rejected",
+                  rejectedAt: new Date().toISOString(),
+                }
+              : r
           )
         );
-        alert("Recharge rejected ❌");
+        setSuccess("Recharge rejected ❌");
       }
     } catch (err) {
       console.error("Failed to reject:", err.response?.data || err);
-      alert(err.response?.data?.msg || "Failed to reject recharge ❌");
+      setError(err.response?.data?.msg || "Failed to reject recharge ❌");
     }
   };
 
+  // 🔹 Show payment details based on method
   const renderPaymentDetails = (recharge) => {
     if (recharge.method === "bank") {
       return (
         <div className="text-sm">
           <div>
-            <strong>Transaction ID:</strong> {recharge.details?.transactionId || "N/A"}
+            <strong>Transaction ID:</strong>{" "}
+            {recharge.details?.transactionId || "N/A"}
           </div>
           <div>
             <strong>Screenshot:</strong>{" "}
             {recharge.screenshotUrl ? (
-              <a 
-                href={recharge.screenshotUrl} 
-                target="_blank" 
+              <a
+                href={recharge.screenshotUrl}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-800 underline"
               >
@@ -105,6 +126,49 @@ export default function RechargeAdmin() {
         </div>
       );
     }
+
+    if (recharge.method === "usdt") {
+      return (
+        <div className="text-sm">
+          <div>
+            <strong>Wallet:</strong>{" "}
+            <span className="font-mono">
+              {recharge.details?.walletAddress || "N/A"}
+            </span>
+          </div>
+          <div>
+            <strong>Amount:</strong>{" "}
+            {recharge.details?.usdtAmount
+              ? `${recharge.details.usdtAmount} USDT`
+              : "N/A"}
+          </div>
+          <div>
+            <strong>Tx Hash:</strong>{" "}
+            {recharge.details?.transactionHash ? (
+              <a
+                href={recharge.blockchainExplorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                {recharge.details.transactionHash.slice(0, 10)}...
+              </a>
+            ) : (
+              "N/A"
+            )}
+          </div>
+          <div>
+            <strong>Network:</strong>{" "}
+            {recharge.details?.blockchainNetwork || "N/A"}
+          </div>
+          <div>
+            <strong>Contract:</strong>{" "}
+            {recharge.details?.contractAddress || "N/A"}
+          </div>
+        </div>
+      );
+    }
+
     return <span className="text-gray-400">N/A</span>;
   };
 
@@ -126,6 +190,7 @@ export default function RechargeAdmin() {
                 <th className="withdraw-th">Details</th>
                 <th className="withdraw-th">Points</th>
                 <th className="withdraw-th">Amount</th>
+                <th className="withdraw-th">Balance</th>
                 <th className="withdraw-th">Status</th>
                 <th className="withdraw-th">Requested At</th>
                 <th className="withdraw-th">Actions</th>
@@ -141,10 +206,27 @@ export default function RechargeAdmin() {
                   </td>
                   <td className="withdraw-td">{r.method}</td>
                   <td className="withdraw-td">{renderPaymentDetails(r)}</td>
-                  <td className="withdraw-td">{r.pointsToAdd}</td>
+                  <td className="withdraw-td">
+                    {r.pointsToAdd?.toLocaleString() || 0}
+                  </td>
                   <td className="withdraw-td">${r.amount}</td>
-                  <td className="withdraw-td">{r.status}</td>
-                  <td className="withdraw-td">{new Date(r.requestedAt).toLocaleString()}</td>
+                  <td className="withdraw-td">
+                    {r.userBalance?.toLocaleString() || "N/A"} points
+                  </td>
+                  <td className="withdraw-td capitalize">
+                    {r.status === "pending" ? (
+                      <span className="text-yellow-400">{r.status}</span>
+                    ) : r.status === "approved" ? (
+                      <span className="text-green-400">{r.status}</span>
+                    ) : r.status === "rejected" ? (
+                      <span className="text-red-400">{r.status}</span>
+                    ) : (
+                      <span className="text-gray-400">{r.status}</span>
+                    )}
+                  </td>
+                  <td className="withdraw-td">
+                    {new Date(r.requestedAt).toLocaleString()}
+                  </td>
                   <td className="withdraw-td">
                     {r.status === "pending" ? (
                       <div className="flex gap-2">
@@ -186,6 +268,22 @@ export default function RechargeAdmin() {
               ))}
             </tbody>
           </table>
+
+          {/* 🔹 Error Alert */}
+          {error && (
+            <div className="mt-4 bg-red-900/50 border border-red-500 rounded-lg p-4 flex items-center space-x-2">
+              <AlertCircle className="w-5 h-5 text-red-400" />
+              <p className="text-red-400">{error}</p>
+            </div>
+          )}
+
+          {/* 🔹 Success Alert */}
+          {success && (
+            <div className="mt-4 bg-green-900/50 border border-green-500 rounded-lg p-4 flex items-center space-x-2">
+              <CheckCircle className="w-5 h-5 text-green-400" />
+              <p className="text-green-400 whitespace-pre-line">{success}</p>
+            </div>
+          )}
 
           {/* Pagination Info */}
           {pagination && pagination.total && (
