@@ -27,7 +27,7 @@ export default function UsersList() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`https://backend-earnkar.vercel.app/api/auth/deleteUser/${userId}`);
+      await axios.delete(`https://theclipstream-backend.onrender.com/api/auth/deleteUser/${userId}`);
       setUsers((prev) => prev.filter((user) => user._id !== userId));
     } catch (err) {
       console.error("Failed to delete user:", err);
