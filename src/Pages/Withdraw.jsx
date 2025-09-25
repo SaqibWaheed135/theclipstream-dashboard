@@ -9,7 +9,7 @@ const Withdraw = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const API_BASE_URL = 'https://theclipstream-backend.onrender.com/api';
+  const API_BASE_URL = 'https://api.theclipstream.com/api';
 
   const fetchWithdrawals = async () => {
     try {

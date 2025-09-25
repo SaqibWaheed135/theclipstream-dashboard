@@ -25,7 +25,7 @@ const Login = () => {
 
 
         try {
-            const res = await axios.post('https://theclipstream-backend.onrender.com/api/admin/admin-login', {
+            const res = await axios.post('https://api.theclipstream.com/api/admin/admin-login', {
                 email,
                 password,
             });

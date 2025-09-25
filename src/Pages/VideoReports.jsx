@@ -11,7 +11,7 @@ export default function ReportedVideos() {
 
     const fetchReports = async () => {
         try {
-            const res = await axios.get('https://theclipstream-backend.onrender.com/api/auth/getreportVideo');
+            const res = await axios.get('https://api.theclipstream.com/api/auth/getreportVideo');
             setReports(res.data.reports || []);
         } catch (err) {
             console.error('Failed to fetch reports:', err);
@@ -32,7 +32,7 @@ export default function ReportedVideos() {
         if (!window.confirm("Delete this video permanently? This action cannot be undone.")) return;
 
         try {
-            await axios.delete(`https://theclipstream-backend.onrender.com/api/auth/deleteVideo/${videoId}`);
+            await axios.delete(`https://api.theclipstream.com/api/auth/deleteVideo/${videoId}`);
 
             setReports((prev) =>
                 prev.filter((r) => r._id !== report._id)
